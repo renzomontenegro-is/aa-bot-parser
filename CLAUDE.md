@@ -44,12 +44,13 @@ NO leer el tecnico de corrido: todavia no se sabe que va a necesitar el usuario.
 PASO 3. PREGUNTAR QUE NECESITA EL USUARIO
 La corrida determinista ya corrio y entrego tecnico + detalle. Nada mas se redacta por
 default. Presentar una ficha corta con los conteos que imprime main.py (pasos, sub-bots,
-pasos de UI, apagados, global values, credenciales, archivos) y el menu de opciones:
-  1. Potencial de migracion a n8n + Python
-  2. Malas practicas identificadas
-  3. Resolver un bug (pedir el archivo de log y cruzar sus lineas con los $n)
-  4. Documentar el proceso de negocio completo (ver rubrica)
-  5. Pregunta libre sobre el bot
+pasos de UI, apagados, global values, credenciales, archivos) y el menu de opciones,
+en lenguaje funcional (lo que el usuario obtiene, no la jerga del export):
+  1. Resumen de que hace el bot
+  2. Potencial de migracion a n8n + Python
+  3. Malas practicas identificadas
+  4. Un documento con todo lo anterior (el proceso_negocio, ver rubrica)
+  5. Resolver un bug en especifico (pedir el archivo de log y cruzar sus lineas con los $n)
 Leer del tecnico SOLO lo que la opcion elegida pide. El detalle se consulta con grep exacto
 por $n/$off/$id, nunca de corrido.
 
@@ -75,7 +76,6 @@ PASO 5. RESPONDER
 Opciones 1, 2, 3 y 5: responder en el chat, citando el tecnico (sub-bot + $n).
 Opcion 4: redactar Bots/<bot>/proceso_negocio_<CODIGO>.md (ver rubrica abajo), con lo que
 haya. Si el usuario consigue archivos despues, se reescriben las partes que dependian de ellos.
-
 Si el pipeline se detiene con un problema de verificacion: NO seguir. Significa que un valor
 del export no llego al documento. Reportarlo tal cual y arreglar la causa antes de auditar.
 
@@ -313,8 +313,8 @@ REGISTRO DE CAMBIOS
   ANTES: con un fileId el agente hacia end-to-end: corria el pipeline deterministico y
     redactaba proceso_negocio_<CODIGO>.md completo, aunque el usuario no lo pidiera.
   AHORA: con un fileId solo corre el proceso deterministico (tecnico + detalle), muestra la
-    ficha con los conteos y pregunta que necesita el usuario, con opciones default:
-    migracion, malas practicas, bug con log, documentar el negocio, pregunta libre.
+    ficha con los conteos y pregunta que necesita el usuario, con opciones default: resumen,
+    migracion, malas practicas, documento con todo lo anterior, bug con log.
     El proceso_negocio pasa a ser la opcion 4, no el entregable default.
 
 07/08/2026 [FIX] ficha de pantalla sin ningun criterio en uso

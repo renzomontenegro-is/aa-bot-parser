@@ -54,11 +54,11 @@ técnico ya muestra qué busca el bot dentro de cada archivo.
    `main.py`, que genera el técnico y el detalle y verifica el contrato.
 2. Con eso listo, muestra la ficha (pasos, sub-bots, pasos de UI, global values, credenciales,
    archivos) y pregunta qué necesitás, con estas opciones por default:
+   - resumen de qué hace el bot
    - potencial de migración a n8n + Python
    - malas prácticas identificadas
-   - resolver un bug (le pasás el log y cruza sus líneas con los pasos `$n`)
-   - documentar el proceso de negocio completo
-   - pregunta libre sobre el bot
+   - un documento con todo lo anterior (el `proceso_negocio`)
+   - resolver un bug en específico (le pasás el log y cruza sus líneas con los pasos `$n`)
 3. Responde en el chat, leyendo del técnico por bloques y consultando el detalle solo con
    greps dirigidos (`$off`, `$id`). El `proceso_negocio` solo se redacta si elegís la opción
    de documentarlo.
