@@ -52,8 +52,7 @@ técnico ya muestra qué busca el bot dentro de cada archivo.
 
 1. Se le pasa un `fileId` (o un nombre, si el bot ya está en `Bots/`). El agente corre
    `main.py`, que genera el técnico y el detalle y verifica el contrato.
-2. Con eso listo, muestra la ficha (pasos, sub-bots, pasos de UI, global values, credenciales,
-   archivos) y pregunta qué necesitás, con estas opciones por default:
+2. Con eso listo, pregunta qué necesitás, con estas opciones por default:
    - resumen de qué hace el bot
    - potencial de migración a n8n + Python
    - malas prácticas identificadas
