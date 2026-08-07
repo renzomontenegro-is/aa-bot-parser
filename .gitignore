@@ -1,0 +1,19 @@
+# Secretos (credenciales del Control Room)
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Datos generados / contenido de bots (regenerable, y puede tener info interna)
+# La carpeta bots/ se mantiene en el repo pero vacia (solo .gitkeep)
+bots/*
+!bots/.gitkeep
+.cache/
+output/
+
+# Assets de sesiones: exports de bots internos y material de apoyo (no compartir)
+assets/
+
+# Config local del agente: permisos y fileIds de esta maquina
+.claude/
