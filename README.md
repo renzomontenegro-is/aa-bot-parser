@@ -1,8 +1,9 @@
 # AA Bot Parser
 
-Audita bots de Automation Anywhere (export A360) sin abrir AA. Le das el `fileId` de un bot
-y te devuelve un documento con todo lo que hace, listo para leer. Genérico: sirve para
-cualquier export; ningún nombre de bot está hardcodeado.
+Audita bots de Automation Anywhere (export A360) sin abrir AA. Le das el `fileId` de un bot,
+corre el proceso determinista (técnico + detalle) y recién ahí preguntás qué necesitás:
+potencial de migración, malas prácticas, un bug (con su log) o el documento de negocio
+completo. Genérico: sirve para cualquier export; ningún nombre de bot está hardcodeado.
 
 ## Puesta en marcha
 
@@ -38,7 +39,7 @@ Por cada bot, en `Bots/<bot>/`:
 |---|---|
 | `proceso_tecnico_<CODIGO>.md` | el árbol del bot en texto legible. Es el que se lee |
 | `detalle_<CODIGO>.md` | el respaldo: coordenadas de los clics, HTML, criterios sin usar y el cuerpo de pasos apagados. Se abre para buscar una cosa |
-| `proceso_negocio_<CODIGO>.md` | el documento de negocio, redactado por el agente (instrucciones y rúbrica en `CLAUDE.md`) |
+| `proceso_negocio_<CODIGO>.md` | el documento de negocio, redactado por el agente SOLO si se lo pedís (instrucciones y rúbrica en `CLAUDE.md`) |
 
 `main.py` también imprime por consola el inventario de lo externo (global values, credenciales,
 archivos, disparador) y el mapa de líneas de cada sub-bot dentro del técnico.
@@ -46,6 +47,21 @@ archivos, disparador) y el mapa de líneas de cada sub-bot dentro del técnico.
 Para redactar el `proceso_negocio` con valores reales: poner los archivos que el bot usa en
 `Bots/<bot>/assets_externos/` y pedirle al agente que los lea. No hace falta para empezar: el
 técnico ya muestra qué busca el bot dentro de cada archivo.
+
+## Flujo de trabajo con el agente
+
+1. Se le pasa un `fileId` (o un nombre, si el bot ya está en `Bots/`). El agente corre
+   `main.py`, que genera el técnico y el detalle y verifica el contrato.
+2. Con eso listo, muestra la ficha (pasos, sub-bots, pasos de UI, global values, credenciales,
+   archivos) y pregunta qué necesitás, con estas opciones por default:
+   - potencial de migración a n8n + Python
+   - malas prácticas identificadas
+   - resolver un bug (le pasás el log y cruza sus líneas con los pasos `$n`)
+   - documentar el proceso de negocio completo
+   - pregunta libre sobre el bot
+3. Responde en el chat, leyendo del técnico por bloques y consultando el detalle solo con
+   greps dirigidos (`$off`, `$id`). El `proceso_negocio` solo se redacta si elegís la opción
+   de documentarlo.
 
 ## Cómo funciona (resumen)
 

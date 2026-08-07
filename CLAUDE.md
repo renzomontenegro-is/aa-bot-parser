@@ -8,8 +8,9 @@ Tres archivos por bot:
 - proceso_tecnico_<CODIGO>.md: lo genera el código, determinista (Python puro, sin IA). El que se lee.
 - detalle_<CODIGO>.md: el respaldo, generado junto al técnico. NO se lee de corrido: se busca
   una cosa con la clave que el técnico escribe ($off = paso apagado, $id = control).
-- proceso_negocio_<CODIGO>.md: lo redacta el agente (ver rúbrica), a partir del técnico y de
-  los archivos externos que consiga el usuario.
+- proceso_negocio_<CODIGO>.md: lo redacta el agente SOLO si el usuario lo pide (opción 4 del
+  menú, ver rúbrica), a partir del técnico y de los archivos externos. No es el entregable
+  por defecto.
 
 Contrato: tecnico + detalle == el export. Se verifica en cada corrida; si no cuadra,
 no se genera ninguno de los dos.
@@ -38,11 +39,25 @@ inspeccionar la carpeta de otro bot, listar exporter/.
 PASO 2. MAPA DE LINEAS
 main.py imprime al final el rango de lineas de cada sub-bot dentro del tecnico.
 Usar esos rangos para leer por bloque; no grepear el archivo entero buscando limites.
+NO leer el tecnico de corrido: todavia no se sabe que va a necesitar el usuario.
 
-PASO 3. ARCHIVOS EXTERNOS (por defecto, NO)
+PASO 3. PREGUNTAR QUE NECESITA EL USUARIO
+La corrida determinista ya corrio y entrego tecnico + detalle. Nada mas se redacta por
+default. Presentar una ficha corta con los conteos que imprime main.py (pasos, sub-bots,
+pasos de UI, apagados, global values, credenciales, archivos) y el menu de opciones:
+  1. Potencial de migracion a n8n + Python
+  2. Malas practicas identificadas
+  3. Resolver un bug (pedir el archivo de log y cruzar sus lineas con los $n)
+  4. Documentar el proceso de negocio completo (ver rubrica)
+  5. Pregunta libre sobre el bot
+Leer del tecnico SOLO lo que la opcion elegida pide. El detalle se consulta con grep exacto
+por $n/$off/$id, nunca de corrido.
+
+PASO 4. ARCHIVOS EXTERNOS (por defecto, NO)
 Decidir solo y decirlo en una linea. Default: seguir de largo. Pedir solo si un archivo es
-IMPRESCINDIBLE (sin el una seccion entera del negocio queda en blanco, no menos precisa),
-y siempre como opcion ("Si algun dia tenes a mano X, lo agrego. Mientras tanto sigo sin el").
+IMPRESCINDIBLE para la opcion elegida (sin el una seccion entera queda en blanco, no menos
+precisa), y siempre como opcion ("Si algun dia tenes a mano X, lo agrego. Mientras tanto
+sigo sin el"). En la practica, solo la opcion 4 los necesita.
 NUNCA pedir: archivos cuyo contenido se deduce del uso que el bot les da; nada que huela a
 secreto (si la variable se llama $contraseña$, $token$, $clave$ o similar, no se pide y va
 directo a la seccion 4 como "no se ve desde el export"); mas de dos o tres archivos.
@@ -56,8 +71,10 @@ cada uno se escribe distinto:
 Un archivo que el bot solo mueve y nunca abre es el unico caso donde no se puede deducir
 nada de su interior: decirlo explicito.
 
-PASO 4. REDACTAR Bots/<bot>/proceso_negocio_<CODIGO>.md (ver rubrica abajo), con lo que haya.
-Si el usuario consigue archivos despues, se reescriben las partes que dependian de ellos.
+PASO 5. RESPONDER
+Opciones 1, 2, 3 y 5: responder en el chat, citando el tecnico (sub-bot + $n).
+Opcion 4: redactar Bots/<bot>/proceso_negocio_<CODIGO>.md (ver rubrica abajo), con lo que
+haya. Si el usuario consigue archivos despues, se reescriben las partes que dependian de ellos.
 
 Si el pipeline se detiene con un problema de verificacion: NO seguir. Significa que un valor
 del export no llego al documento. Reportarlo tal cual y arreglar la causa antes de auditar.
@@ -292,6 +309,14 @@ FORMATO A360 (lo minimo; investigar en web lo que falte, citando fuente)
 =========================================================================
 REGISTRO DE CAMBIOS
 =========================================================================
+07/08/2026 [FLUJO] el agente deja de redactar proceso_negocio por default
+  ANTES: con un fileId el agente hacia end-to-end: corria el pipeline deterministico y
+    redactaba proceso_negocio_<CODIGO>.md completo, aunque el usuario no lo pidiera.
+  AHORA: con un fileId solo corre el proceso deterministico (tecnico + detalle), muestra la
+    ficha con los conteos y pregunta que necesita el usuario, con opciones default:
+    migracion, malas practicas, bug con log, documentar el negocio, pregunta libre.
+    El proceso_negocio pasa a ser la opcion 4, no el entregable default.
+
 07/08/2026 [FIX] ficha de pantalla sin ningun criterio en uso
   ANTES: partir.py mandaba al detalle todo criterio sin enabled true. Si la ficha no tenia
     ninguno en true, se quedaba sin criteria y el control de suficiencia (b) frenaba la
