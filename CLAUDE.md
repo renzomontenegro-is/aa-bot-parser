@@ -43,9 +43,8 @@ NO leer el tecnico de corrido: todavia no se sabe que va a necesitar el usuario.
 
 PASO 3. PREGUNTAR QUE NECESITA EL USUARIO
 La corrida determinista ya corrio y entrego tecnico + detalle. Nada mas se redacta por
-default. Presentar una ficha corta con los conteos que imprime main.py (pasos, sub-bots,
-pasos de UI, apagados, global values, credenciales, archivos) y el menu de opciones,
-en lenguaje funcional (lo que el usuario obtiene, no la jerga del export):
+default. Presentar SOLO el menu de opciones, en lenguaje funcional (lo que el usuario
+obtiene, no la jerga del export):
   1. Resumen de que hace el bot
   2. Potencial de migracion a n8n + Python
   3. Malas practicas identificadas
@@ -73,9 +72,36 @@ Un archivo que el bot solo mueve y nunca abre es el unico caso donde no se puede
 nada de su interior: decirlo explicito.
 
 PASO 5. RESPONDER
-Opciones 1, 2, 3 y 5: responder en el chat, citando el tecnico (sub-bot + $n).
+Opciones 1, 2, 3 y 5: responder en el chat.
 Opcion 4: redactar Bots/<bot>/proceso_negocio_<CODIGO>.md (ver rubrica abajo), con lo que
 haya. Si el usuario consigue archivos despues, se reescriben las partes que dependian de ellos.
+
+REGISTRO POR DEFECTO: LENGUAJE DE NEGOCIO
+El lector es un jefe que no es del area: entiende la operacion, no el export. Toda respuesta
+del menu arranca en ese registro. El tecnico es la fuente, no el vocabulario.
+NO van en el cuerpo de la respuesta:
+- direcciones del documento: $n, $off, $id, nombres de sub-bot, rangos de linea.
+- nombres de paquete/comando de AA ni de variables del bot.
+- vocabulario de plataforma: IMAP, JWT, token, bucket, endpoint, sub-bot, global value,
+  locker, credencial, sesion, iterador, parseo. Si el concepto hace falta, se dice por lo
+  que es ("la casilla de correo", "la nube de Google", "el archivo de configuracion").
+SI van:
+- que hace el bot contado como el recorrido del dato, de la fuente al destino.
+- cada hallazgo por su EFECTO en la operacion, no por su mecanismo. El mecanismo es la
+  respuesta a "por que", y solo se da si lo piden.
+- lo que falla en silencio, dicho explicito: no rompe, hace algo distinto, nadie se entera.
+- el riesgo si el bot se cae: quien se queda esperando y si se detecta el mismo dia.
+Un hallazgo se escribe solo si se puede terminar la frase "esto significa que la operacion...".
+Si no se puede, es un detalle tecnico y no entra.
+
+CIERRE OBLIGATORIO
+Toda respuesta del menu termina ofreciendo el detalle tecnico Y DE QUE PARTE, listando los
+puntos concretos que se acaban de mencionar para que el usuario elija. Nunca un ofrecimiento
+generico.
+  mal : "Si queres te doy el detalle tecnico."
+  bien: "Puedo abrir el detalle tecnico de: (a) por que el reproceso no funciona, (b) como
+         decide que correos se queda, (c) como sube los archivos a la nube. Cual?"
+Recien ahi se citan sub-bot y $n, y se baja al vocabulario del export.
 Si el pipeline se detiene con un problema de verificacion: NO seguir. Significa que un valor
 del export no llego al documento. Reportarlo tal cual y arreglar la causa antes de auditar.
 
@@ -109,10 +135,27 @@ Como interpretarlo:
 - "disabled: true" = paso APAGADO.
 - Pasos de UI (Recorder o Keystrokes): objNode.name = el control, criteria.* = criterios.
 
-NUMERACION DE PASOS: cada paso lleva `$n`, correlativo dentro de su sub-bot. Es la direccion
-del paso: citarlo en el negocio, cruzarlo con una linea de log, ir al detalle. Plana a
-proposito (el arbol llega a 15 niveles; la jerarquia la muestra la sangria). Se calcula por
-posicion: si alguien inserta un paso, los `$n` de ahi para abajo se corren.
+NUMERACION DE PASOS: cada paso lleva `$n`, correlativo dentro de su sub-bot. Plana a
+proposito (el arbol llega a 15 niveles; la jerarquia la muestra la sangria).
+
+`$n` ES EL NUMERO DE LINEA DEL EDITOR DE AA. El export NO trae ningun campo de linea (los
+nodos solo tienen `uid`, un GUID), pero `numerar()` reproduce la numeracion de la UI exacta:
+recorre en pre-orden y cuenta TODO nodo con `commandName`, incluidas las ramas (else, catch,
+finally) y los pasos apagados con sus hijos, y numera ANTES de mover los cuerpos apagados al
+detalle. Por eso un step apagado de 7 lineas hace saltar de `$n7` a `$n15`: esas 7 lineas
+existen en el editor aunque el bloque este colapsado.
+Verificado contra la UI en el RP053, en los dos casos que importan:
+- sub-bot SIN pasos apagados (el de entrada): linea 1 = try, linea 8 = Comment "Definir
+  archivo Log", linea 54 = if $bBotExecutedSuccessfully$ EqualsTo false.
+- sub-bot CON pasos apagados (T061, step apagado de 7 en `$n7`): linea 15 = step "Registrar
+  el inicio del Taskbot  y variables.", linea 16 = trim "T061" -> sCodigo-Task. El editor
+  numera lo de adentro del bloque apagado, asi que no hay offset que corregir.
+Entonces citar `$n` no es una direccion interna del parser: es la linea que el usuario abre
+en el editor, y es la misma numeracion que devuelve `$Error-LineNumber$` en el log del bot,
+asi que un log cruza contra el tecnico sin traducir nada.
+Se calcula por posicion: si alguien inserta un paso en AA, los `$n` de ahi para abajo se
+corren, igual que en la UI. Si el usuario dicta una linea y no coincide con el `$n`, el
+export esta desactualizado respecto del bot en el Control Room: re-exportar antes de seguir.
 
 LO QUE ESTA EN EL DETALLE Y COMO LLEGAR: el tecnico no trae todo; el detalle esta
 direccionado desde el propio tecnico:
@@ -309,6 +352,39 @@ FORMATO A360 (lo minimo; investigar en web lo que falte, citando fuente)
 =========================================================================
 REGISTRO DE CAMBIOS
 =========================================================================
+07/08/2026 [FIX] `$n` queda documentado como el numero de linea del editor de AA
+  ANTES: el `$n` se describia como una anotacion local del parser ("la direccion del paso"),
+    calculada por posicion. Quedaba la duda de si citarlo le servia de algo al usuario, que
+    trabaja mirando la UI de AA, o si hacia falta buscar en el export algun campo con la
+    linea real (no existe: los nodos solo traen `uid`).
+  AHORA: se verifico contra la UI del RP053 que `$n` COINCIDE con la linea del editor, en un
+    sub-bot sin pasos apagados y en uno con un bloque apagado de 7 (el editor numera lo de
+    adentro del bloque colapsado, no hay offset). Por que coincide: `numerar()` cuenta todo
+    nodo con commandName en pre-orden, incluidas ramas y pasos apagados con sus hijos, antes
+    de partir el detalle. Documentado en COMO LEER, junto con
+    que es la misma numeracion de `$Error-LineNumber$` (el log cruza sin traducir) y que una
+    linea dictada que no coincide significa export desactualizado, no error de numeracion.
+
+07/08/2026 [FLUJO] se elimina la ficha de conteos al presentar el menu
+  ANTES: antes del menu se mostraba una ficha con los conteos de main.py (pasos, sub-bots,
+    pasos de UI, apagados, global values, credenciales, archivos). Son metricas del export,
+    no dicen nada de lo que el bot hace ni ayudan a elegir opcion: ocupan la primera
+    pantalla con ruido.
+  AHORA: tras la corrida determinista se presenta SOLO el menu de opciones. Los conteos
+    quedan en la consola de main.py y se usan adentro de las respuestas (la rubrica los
+    exige contados en la ficha rapida 1.3 y en las malas practicas), no como preambulo.
+
+07/08/2026 [FLUJO] el lenguaje de negocio pasa a ser el registro por defecto
+  ANTES: las opciones del menu se respondian en el vocabulario del export, citando sub-bot
+    y $n en el cuerpo, con terminos de plataforma (IMAP, JWT, bucket, global value). Servia
+    para el area, pero un jefe de negocio se trababa en la mitad y los hallazgos importantes
+    quedaban enterrados adentro del paso a paso.
+  AHORA: toda respuesta del menu arranca en lenguaje de negocio: el recorrido del dato, cada
+    hallazgo por su efecto en la operacion, lo que falla en silencio dicho explicito, y el
+    riesgo si el bot se cae. Sin $n, sin nombres de sub-bot ni de paquete, sin vocabulario
+    de plataforma. La respuesta cierra ofreciendo el detalle tecnico y de que parte, con la
+    lista de puntos concretos para elegir; recien ahi se citan sub-bot y $n.
+
 07/08/2026 [FLUJO] el agente deja de redactar proceso_negocio por default
   ANTES: con un fileId el agente hacia end-to-end: corria el pipeline deterministico y
     redactaba proceso_negocio_<CODIGO>.md completo, aunque el usuario no lo pidiera.
